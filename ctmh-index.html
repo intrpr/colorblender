@@ -1,0 +1,477 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset=utf-8>
+	<title>Color Blender</title>
+	<link href='https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
+	<style type="text/css">
+		body { color: #333; font-family: "SourceCodePro-Regular", monospace; margin: 3em 4em; font-weight: 400;}
+		form { margin: 0;}
+		h1 { line-height: .85em; letter-spacing: -1px; padding-bottom: 0; font-weight: 400;}
+		small { font-size: 70%; vertical-align: baseline; }
+
+		#main { width: 100%; }
+
+		#uicell { width: 100px; }
+		#uicell th { font-family: "SourceCodePro-Regular", monospace; font-weight: 700; letter-spacing: -.04em; text-align: left; padding: .1em; }
+		#uicell td { padding: .1em; }
+		#uicell td.pal { padding: 0 3em; }
+		#uicell #gobuttons td { hexight: 1.5em; }
+
+		input, #input a { font: 1em "SourceCodePro-Regular", monospace; padding: .1em; }
+		#input, #output { margin: 0 0 1em; }
+
+		#input td { white-space: nowrap; padding: .3em; }
+		#input a { border: 1px outset silver; background: #f1f1f1; padding: .15em .3em; cursor: pointer; }
+		#input .coltype { background: #eee; border-style: inset; }
+		#input .second { background: #fff; border: 0 solid #f1f1f1; color: #ddd; }
+		#input select { font-size: .9em; }
+
+		#output input { border: 2px solid white; border-width: 0 2px; }
+		#output td.text { border-bottom: 1px dotted silver; }
+
+		#watercell { width: 60%; background: #fff; padding: 1em 1em 1em 2em; }
+		.grid { margin: 0 0 .8em 0; }
+		.grid td { height: 2em; width: 2em; padqqding: 0; lineqq-height: 11px; border: 3px solid #fff;}
+		.grid td a { display: block; height: 2.2em; width: 2.2em; lineqq-height: 10px; borqqder: 1px solid #fff; borderqq-width: 0 4px 4px 0; margin: .5em }
+		.grid .outline { border: 1px solid #f1f1f1; height: 2.05em; width: 2.1em; }
+
+		#textcell p { margin: 0; padding: 0 1em 1em 1.5em; }
+		#watercell ul { margin: 0 0 .3em -1.5em !important; }
+		#watercell li { font-size: .8em; margin: 0 0 .3em 0; }
+		#watercell h4 { font-size: .65em; text-transform: uppercase; letter-spacing: .2em; margin: 0 0 1em 0; padding: 0 0 .8em 0; border: 1px dotted #bbb; border-width: 0 0 1px 0; }
+
+		#footer { color: #999; font-size: .7em; padding: 1em 0 0 0; border: 1px dotted #666; border-width: 1px 0 0 0; }
+		#footer p { }
+		#footer img { float: right; margin: 0 0 .5em 2em; }
+	</style>
+</head>
+
+<body>
+	<form onSubmit="return false;">
+		<h1>Color Blender <small>(v1.0)</small></h1>
+		<table border="0" cellpadding="0" cellspacing="0" id="main" >
+			<tr valign="top">
+				<td id="uicell">
+					<table border="0" cellpadding="0" id="input" >
+						<tr>
+							<th width="100">Format</th>
+							<td colspan="2">
+								<a class="coltype" onClick="setType('hex');" id="hex">Hex</a>
+								<a onClick="setType('rgbd');" id="rgbd">RGB</a>
+								<a onClick="setType('rgbp');" id="rgbp">RGB%</a>
+								<!-- <a onClick="setType('cmyk');" id="cmyk">CMYK</a> !-->
+							</td>
+						</tr>
+						<tr>
+							<th id="l1">Color 1</th>
+							<td class="col"><input style="background-color: rgb(255, 255, 153);" id="col0" size="19" onBlur="colorStore('0');" onFocus="setCursor(0);" type="text"></td>
+							<td style="background: white;" class="pal" id="c0"></td>
+						</tr>
+						<tr>
+							<th id="l2">Color 2</th>
+							<td class="col"><input id="col1" size="19" onBlur="colorStore('1');" onFocus="setCursor(1);" type="text"></td>
+							<td style="background: white;" class="pal" id="c1"></td>
+						</tr>
+						<tr>
+							<th>Midpoints</th>
+							<td>
+								<select id="steps">
+								<option value="1">1</option>
+								<option value="2">2</option>
+								<option value="3">3</option>
+								<option value="4">4</option>
+								<option value="5">5</option>
+								<option value="6">6</option>
+								<option value="7">7</option>
+								<option value="8">8</option>
+								<option value="9">9</option>
+								<option selected="selected" value="10">10</option>
+								</select>
+							</td>
+						</tr>
+						<tr id="gobuttons">
+							<td></td>
+							<td><a onClick="drawPalette();">blend</a> <a class="second" onClick="init();">clear</a></td>
+							<td></td>
+						</tr>
+					</table>
+
+				<table border="0" cellpadding="0" id="output">
+					<tr>
+						<th width="100">Results</th>
+						<td class="text"><input id="pal0" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p0"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal1" size="19" type="text"></td>
+						<td style="backxground: white;" class="pal" id="p1"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal2" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p2"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal3" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p3"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal4" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p4"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal5" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p5"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal6" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p6"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal7" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p7"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal8" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p8"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal9" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p9"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal10" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p10"></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td class="text"><input id="pal11" size="19" type="text"></td>
+						<td style="background: white;" class="pal" id="p11"></td>
+					</tr>
+				</table>
+			</td>
+			<td id="watercell">
+				<!-- <h4>Current (2012) Colors</h4> !-->
+				<table class="grid" cellspacing="0">
+					<tr>
+						<td style="background: #6496a7;"><a href="javascript:colorIns('#6496a7');" title=""></a></td>
+						<td style="background: #81c3de;"><a href="javascript:colorIns('#81c3de');" title=""></a></td>
+						<td style="background: #8ed8f8;"><a href="javascript:colorIns('#8ed8f8');" title=""></a></td>
+						<td style="background: #81b1a9;"><a href="javascript:colorIns('#81b1a9');" title=""></a></td>
+						<td style="background: #c9d096;"><a href="javascript:colorIns('#c9d096');" title=""></a></td>
+						<td style="background: #fae8ac;"><a href="javascript:colorIns('#fae8ac');" title=""></a></td>
+						<td style="background: #fecd87;"><a href="javascript:colorIns('#fecd87');" title=""></a></td>
+						<td style="background: #f69783;"><a href="javascript:colorIns('#f69783');" title=""></a></td>
+						<td style="background: #f1aeb5;"><a href="javascript:colorIns('#f1aeb5');" title=""></a></td>
+						<td style="background: #f37977;"><a href="javascript:colorIns('#f37977');" title=""></a></td>
+					</tr>
+					<tr>
+						<td style="background: #8071b4;"><a href="javascript:colorIns('#8071b4');" title=""></a></td>
+						<td style="background: #0075a3;"><a href="javascript:colorIns('#0075a3');" title=""></a></td>
+						<td style="background: #00b8ba;"><a href="javascript:colorIns('#00b8ba');" title=""></a></td>
+						<td style="background: #668444;"><a href="javascript:colorIns('#668444');" title=""></a></td>
+						<td style="background: #a0cf67;"><a href="javascript:colorIns('#a0cf67');" title=""></a></td>
+						<td style="background: #fdbb24;"><a href="javascript:colorIns('#fdbb24');" title=""></a></td>
+						<td style="background: #f08955;"><a href="javascript:colorIns('#f08955');" title=""></a></td>
+						<td style="background: #f386a7;"><a href="javascript:colorIns('#f386a7');" title=""></a></td>
+						<td style="background: #e16d7a;"><a href="javascript:colorIns('#e16d7a');" title=""></a></td>
+						<td style="background: #b8413a;"><a href="javascript:colorIns('#b8413a');" title=""></a></td>
+					</tr>
+					<tr>
+						<td style="background: #785f70;"><a href="javascript:colorIns('#785f70');" title=""></a></td>
+						<td style="background: #2e3d55;"><a href="javascript:colorIns('#2e3d55');" title=""></a></td>
+						<td style="background: #5d87a8;"><a href="javascript:colorIns('#5d87a8');" title=""></a></td>
+						<td style="background: #364e46;"><a href="javascript:colorIns('#364e46');" title=""></a></td>
+						<td style="background: #545d3f;"><a href="javascript:colorIns('#545d3f');" title=""></a></td>
+						<td style="background: #8d8c5f;"><a href="javascript:colorIns('#8d8c5f');" title=""></a></td>
+						<td style="background: #e09043;"><a href="javascript:colorIns('#e09043');" title=""></a></td>
+						<td style="background: #cb6d36;"><a href="javascript:colorIns('#cb6d36');" title=""></a></td>
+						<td style="background: #8e4b43;"><a href="javascript:colorIns('#8e4b43');" title=""></a></td>
+						<td style="background: #C61330;"><a href="javascript:colorIns('#C61330');" title=""></a></td>
+					</tr>
+					<tr>
+						<td style="background: #000000;"><a href="javascript:colorIns('#000000');" title=""></a></td>
+						<td style="background: #968C81;"><a href="javascript:colorIns('#968C81');" title=""></a></td>
+						<td style="background: #BAB4AB;"><a href="javascript:colorIns('#BAB4AB');" title=""></a></td>
+						<td style="background: #635445;"><a href="javascript:colorIns('#635445');" title=""></a></td>
+						<td style="background: #7d5a4e;"><a href="javascript:colorIns('#7d5a4e');" title=""></a></td>
+						<td style="background: #B07047;"><a href="javascript:colorIns('#B07047');" title=""></a></td>
+						<td style="background: #D1AC84;"><a href="javascript:colorIns('#D1AC84');" title=""></a></td>
+						<td style="background: #ECD2AD;"><a href="javascript:colorIns('#ECD2AD');" title=""></a></td>
+						<td style="background: #A3824B;"><a href="javascript:colorIns('#A3824B');" title=""></a></td>
+						<td style="background: #E1D1A5;"><a href="javascript:colorIns('#E1D1A5');" title=""></a></td>
+					</tr>
+				</table>
+				<!-- <h4>Corporate (2012) Colors</h4> !-->
+				<table class="grid" cellspacing="0">
+					<tr>
+						<td style="background: #ffffff;"><a href="javascript:colorIns('#ffffff');" title="" class="outline"></a></td>
+						<td style="background: #fff7df;"><a href="javascript:colorIns('#fff7df');" title=""></a></td>
+						<td style="background: #68071F;"><a href="javascript:colorIns('#68071F');" title=""></a></td>
+						<td style="background: #005F6A;"><a href="javascript:colorIns('#005F6A');" title=""></a></td>
+						<td style="background: #BACBC1;"><a href="javascript:colorIns('#BACBC1');" title=""></a></td>
+					</tr>
+				</table>
+				<!-- <h4>Retired (2005&#8211;2011) Colors</h4> !-->
+				<table class="grid" cellspacing="0">
+					<tr>
+						<td style="background: #ffebcd;"><a href="javascript:colorIns('#ffebcd');" title=""></a></td>
+						<td style="background: #ffe4c8;"><a href="javascript:colorIns('#ffe4c8');" title=""></a></td>
+						<td style="background: #fcdcdd;"><a href="javascript:colorIns('#fcdcdd');" title=""></a></td>
+						<td style="background: #fccbaa;"><a href="javascript:colorIns('#fccbaa');" title=""></a></td>
+						<td style="background: #fff2a1;"><a href="javascript:colorIns('#fff2a1');" title=""></a></td>
+						<td style="background: #ffe56b;"><a href="javascript:colorIns('#ffe56b');" title=""></a></td>
+						<td style="background: #fcb856;"><a href="javascript:colorIns('#fcb856');" title=""></a></td>
+						<td style="background: #d2e6ae;"><a href="javascript:colorIns('#d2e6ae');" title=""></a></td>
+						<td style="background: #abac85;"><a href="javascript:colorIns('#abac85');" title=""></a></td>
+						<td style="background: #b6e4fa;"><a href="javascript:colorIns('#b6e4fa');" title=""></a></td>
+						<td style="background: #519fd7;"><a href="javascript:colorIns('#519fd7');" title=""></a></td>
+						<td style="background: #39689e;"><a href="javascript:colorIns('#39689e');" title=""></a></td>
+						<td style="background: #a481a4;"><a href="javascript:colorIns('#a481a4');" title=""></a></td>
+						<td style="background: #623f5b;"><a href="javascript:colorIns('#623f5b');" title=""></a></td>
+					</tr>
+					<tr>
+						<td style="background: #da99c3;"><a href="javascript:colorIns('#da99c3');" title=""></a></td>
+						<td style="background: #f498c0;"><a href="javascript:colorIns('#f498c0');" title=""></a></td>
+						<td style="background: #e96fa3;"><a href="javascript:colorIns('#e96fa3');" title=""></a></td>
+						<td style="background: #f48d9a;"><a href="javascript:colorIns('#f48d9a');" title=""></a></td>
+						<td style="background: #f58546;"><a href="javascript:colorIns('#f58546');" title=""></a></td>
+						<td style="background: #D1AB3D;"><a href="javascript:colorIns('#D1AB3D');" title=""></a></td>
+						<td style="background: #eee690;"><a href="javascript:colorIns('#eee690');" title=""></a></td>
+						<td style="background: #bdd74e;"><a href="javascript:colorIns('#bdd74e');" title=""></a></td>
+						<td style="background: #6aa64f;"><a href="javascript:colorIns('#6aa64f');" title=""></a></td>
+						<td style="background: #9DB79E;"><a href="javascript:colorIns('#9DB79E');" title=""></a></td>
+						<td style="background: #9fd9de;"><a href="javascript:colorIns('#9fd9de');" title=""></a></td>
+						<td style="background: #00b7c1;"><a href="javascript:colorIns('#00b7c1');" title=""></a></td>
+						<td style="background: #0080bb;"><a href="javascript:colorIns('#0080bb');" title=""></a></td>
+						<td style="background: #6b5da8;"><a href="javascript:colorIns('#6b5da8');" title=""></a></td>
+					</tr>
+					<tr>
+						<td style="background: #e83e4c;"><a href="javascript:colorIns('#e83e4c');" title=""></a></td>
+						<td style="background: #cd545a;"><a href="javascript:colorIns('#cd545a');" title=""></a></td>
+						<td style="background: #8f4a56;"><a href="javascript:colorIns('#8f4a56');" title=""></a></td>
+						<td style="background: #7d4a4a;"><a href="javascript:colorIns('#7d4a4a');" title=""></a></td>
+						<td style="background: #bf825f;"><a href="javascript:colorIns('#bf825f');" title=""></a></td>
+						<td style="background: #c9ccc3;"><a href="javascript:colorIns('#c9ccc3');" title=""></a></td>
+						<td style="background: #899095;"><a href="javascript:colorIns('#899095');" title=""></a></td>
+						<td style="background: #abc6e8;"><a href="javascript:colorIns('#abc6e8');" title=""></a></td>
+						<td style="background: #7e9cd1;"><a href="javascript:colorIns('#7e9cd1');" title=""></a></td>
+						<td style="background: #b7b3d9;"><a href="javascript:colorIns('#b7b3d9');" title=""></a></td>
+					</tr>
+				</table>
+				<p><strong>Instructions and Helpful Hints</strong></p>
+				<ul>
+					<li>Pick a color value format, input two <strong>valid</strong> color values in the format you chose, and pick the number of midpoints you’d like to see. The palette will show the colors you input as well as the requested number of midpoint colors, and the values of those colors.</li>
+					<li>To see a tint of a single color, select White as one of your other colors.</li>
+					<li>All numbers are rounded to the nearest integer.</li>
+					<li>Clicking on a square above will fill in the appropriate value for whichever input is highlighted.</li>
+					<li>Switching between value formats will translate whatever values are in place.</li>
+					<li>Clear removes all values and colors, but does not change the current value format.</li>
+				</ul>
+			</td>
+		</tr>
+	</table>
+	</form>
+
+	<div id="footer">
+		<img alt="Creative Commons License" src="http://wiki.ubc.ca/images/7/77/Cc-srr.png" border="0">
+		<p>The Color Blender is licensed under a Creative Commons <a href="http://creativecommons.org/licenses/by-sa/1.0/" rel="license">Attribution-ShareAlike 1.0</a> License.</p>
+	</div>
+
+	<script type="text/javascript">
+		// Thanks to Steve Champeon (hesketh.com) for explaining the math in such a way that I could
+		// understand it and create this tool
+		// Thanks to Roberto Diez for the idea to create the "waterfall" display
+		// Thanks to the Rhino book, I was able to (clumsily) set up the Color object
+
+		var cursor = 0;
+		var colType = 'hex';
+		var base = 16;
+		var ends = new Array(new Color,new Color);
+		var step = new Array(3);
+		var palette = new Array(new Color,new Color,new Color,new Color,new Color,new Color,new Color,new Color,new Color,new Color,new Color,new Color);
+
+		function GetElementsWithClassName(elementName,className) {
+			var allElements = document.getElementsByTagName(elementName);
+			var elemColl = new Array();
+			for (i = 0; i< allElements.length; i++) {
+				if (allElements[i].className == className) {
+					elemColl[elemColl.length] = allElements[i];
+				}
+			}
+			return elemColl;
+		}
+
+		function Color(r,g,b) {
+			this.r = r;
+			this.g = g;
+			this.b = b;
+			this.coll = new Array(r,g,b);
+			this.valid = cVerify(this.coll);
+			this.text = cText(this.coll);
+			this.bg = cText(this.coll);
+		}
+
+		function cVerify(c) {
+			var valid = 'n';
+			if ((!isNaN(c[0])) && (!isNaN(c[1])) && (!isNaN(c[2]))) {valid = 'y'}
+			return valid;
+		}
+
+		function cText(c) {
+			var result = '';
+			var d = 1;
+			if (colType == 'rgbp') {d = 2.55}
+			for (k = 0; k < 3; k++) {
+				val = Math.round(c[k]/d);
+				piece = val.toString(base);
+				if (colType == 'hex' && piece.length < 2) {piece = '0' + piece;}
+				if (colType == 'rgbp') {piece = piece + '%'};
+				if (colType != 'hex' && k < 2) {piece = piece + ',';}
+				result = result + piece;
+			}
+			if (colType == 'hex') {result = '#' + result.toUpperCase();}
+				else {result = 'rgb(' + result + ')';}
+			return result;
+		}
+
+		function colorParse(c,t) {
+			var m = 1;
+			c = c.toUpperCase();
+			col = c.replace(/[\#rgb\(]*/,'');
+			if (t == 'hex') {
+				if (col.length == 3) {
+					a = col.substr(0,1);
+					b = col.substr(1,1);
+					c = col.substr(2,1);
+					col = a + a + b + b + c + c;
+				}
+				var num = new Array(col.substr(0,2),col.substr(2,2),col.substr(4,2));
+				var base = 16;
+			} else {
+				var num = col.split(',');
+				var base = 10;
+			}
+			if (t == 'rgbp') {m = 2.55}
+			var ret = new Array(parseInt(num[0],base)*m,parseInt(num[1],base)*m,parseInt(num[2],base)*m);
+			return(ret);
+		}
+
+		function colorPour(pt,n) {
+			var textObj = document.getElementById(pt + n.toString());
+			var colObj = document.getElementById(pt.substring(0,1) + n.toString());
+			if (pt == 'col') {temp = ends[n]} else {temp = palette[n]}
+			if (temp.valid == 'y') {
+				textObj.value = temp.text;
+				colObj.style.backgroundColor = temp.bg;
+			}
+		}
+
+		function colorStore(n) {
+			var inVal = 'col'+n.toString();
+			var inCol = document.getElementById(inVal).value;
+			var c = colorParse(inCol,colType);
+			ends[n] = new Color(c[0],c[1],c[2]);
+			if (ends[n].valid == 'y') {colorPour('col',n)}
+		}
+
+		function stepCalc() {
+			var steps = parseInt(document.getElementById('steps').value) + 1;
+			step[0] = (ends[1].r - ends[0].r) / steps;
+			step[1] = (ends[1].g - ends[0].g) / steps;
+			step[2] = (ends[1].b - ends[0].b) / steps;
+		}
+
+		function mixPalette() {
+			var steps = parseInt(document.getElementById('steps').value);
+			var count = steps + 1;
+			palette[0] = new Color(ends[0].r,ends[0].g,ends[0].b);
+			palette[count] = new Color(ends[1].r,ends[1].g,ends[1].b);
+			for (i = 1; i < count; i++) {
+				var r = (ends[0].r + (step[0] * i));
+				var g = (ends[0].g + (step[1] * i));
+				var b = (ends[0].b + (step[2] * i));
+					palette[i] = new Color(r,g,b);
+			}
+			for (j = count + 1; j < 12; j++) {
+				palette[j].text = '';
+				palette[j].bg = 'white';
+			}
+		}
+
+		function drawPalette() {
+			stepCalc();
+			mixPalette();
+			for (i = 0; i < 12; i++) {
+				colorPour('pal',i);
+			}
+		}
+
+		function setCursor(n) {
+			cursor = n;
+			var obj1 = document.getElementById('col0');
+			var obj2 = document.getElementById('col1');
+			obj1.style.backgroundColor = '';
+			obj2.style.backgroundColor = '';
+			if (cursor >= 0 && cursor <= 1) {
+				document.getElementById('col'+cursor).style.backgroundColor = '#FF9';
+			}
+		}
+
+		function colorIns(c) {
+			var obj = document.getElementById('col'+cursor);
+			var result = colorParse(c,'hex');
+			ends[cursor] = new Color(result[0],result[1],result[2]);
+			obj.value = ends[cursor].text;
+			if (ends[cursor].valid == 'y') {colorPour('col',cursor)}
+		}
+
+		function setType(inp) {
+			colType = inp;
+			if (inp == 'hex') {base = 16;} else {base = 10;}
+			for (i = 0; i < 2; i++) {
+				var obj = document.getElementById('col' + i);
+				if (ends[i].valid == 'y') {
+					ends[i] = new Color(ends[i].r,ends[i].g,ends[i].b);
+					obj.value = ends[i].text;
+				}
+			}
+			drawPalette();
+			document.getElementById('hex').className = '';
+			document.getElementById('rgbd').className = '';
+			document.getElementById('rgbp').className = '';
+			document.getElementById(inp).className = 'coltype';
+		}
+
+		function init(inp) {
+			if (!inp) {
+				obj = GetElementsWithClassName('a','coltype');
+				inp = obj[0].id;
+			}
+			document.getElementById(inp).className = 'coltype';
+			for (i = 0; i < 2; i++) {
+				ends[i] = new Color;
+				document.getElementById('col'+i).value = '';
+				document.getElementById('c'+i).style.background = 'white';
+			}
+			for (j = 0; j < 12; j++) {
+				palette[j] = new Color;
+				document.getElementById('pal'+j).value = '';
+				document.getElementById('p'+j).style.background = 'white';
+			}
+			document.getElementById('steps').value = '0';
+			document.getElementById('col0').focus();
+		}
+		</script>
+</body>
+</html>
